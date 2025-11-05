@@ -1,0 +1,96 @@
+from collections import deque
+
+# Step 1: Create a 10x10 parking lot grid with open paths
+def create_parking_lot():
+    lot = [
+        ['I', 'O', 'O', 'E', 'X', 'X', 'X', 'X', 'X', 'X'],
+        ['X', 'O', 'X', 'O', 'O', 'X', 'X', 'X', 'X', 'X'],
+        ['X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X', 'X'],
+        ['X', 'O', 'O', 'O', 'E', 'X', 'O', 'X', 'X', 'X'],
+        ['X', 'X', 'X', 'X', 'O', 'O', 'O', 'X', 'X', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'O', 'O', 'O', 'E'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'X'],
+        ['X', 'X', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'E']
+    ]
+    return lot, (0, 0)
+
+# Step 2: Print the parking lot grid
+def print_grid(lot, title):
+    print(f"\n🅿️ {title}:")
+    for row in lot:
+        print(" ".join(row))
+    print()
+
+# Step 3: BFS to find and mark the nearest empty slot
+def find_and_park(lot, start):
+    rows, cols = len(lot), len(lot[0])
+    visited = [[False]*cols for _ in range(rows)]
+    queue = deque([start])
+    visited[start[0]][start[1]] = True
+    directions = [(-1,0), (1,0), (0,-1), (0,1)]  # Up, Down, Left, Right
+
+    while queue:
+        r, c = queue.popleft()
+
+        # Check if current cell is an empty slot
+        if lot[r][c] == 'E':
+            lot[r][c] = 'X'  # Mark as occupied
+            print(f"✅ Nearest free parking slot found at: ({r}, {c})")
+            print("🚗 Vehicle parked successfully!")
+            return True
+
+        # Explore neighbors
+        for dr, dc in directions:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < rows and 0 <= nc < cols:
+                if not visited[nr][nc] and lot[nr][nc] in ('O', 'E'):
+                    visited[nr][nc] = True
+                    queue.append((nr, nc))
+
+    print("❌ No empty parking slot available.")
+    return False
+
+# Step 4: Remove (unpark) a vehicle
+def remove_car(lot):
+    print_grid(lot, "Current Parking Lot")
+    try:
+        r = int(input("Enter the row number of the car to remove (0–9): "))
+        c = int(input("Enter the column number of the car to remove (0–9): "))
+
+        if lot[r][c] == 'X':
+            lot[r][c] = 'E'
+            print(f"🚙 Car removed successfully from location ({r}, {c}).")
+        else:
+            print("❌ That spot doesn’t have a car parked.")
+    except (ValueError, IndexError):
+        print("⚠️ Invalid input! Please enter row and column between 0–9.")
+
+# Step 5: Menu system
+def main_menu():
+    lot, start_pos = create_parking_lot()
+
+    while True:
+        print("\n=== 🚘 PARKING SLOT FINDER ===")
+        print("1. Find Nearest Parking Slot")
+        print("2. Remove a Parked Car")
+        print("3. Exit")
+        choice = input("Enter your choice (1–3): ").strip()
+
+        if choice == '1':
+            print_grid(lot, "Current Parking Lot")
+            find_and_park(lot, start_pos)
+            print_grid(lot, "Updated Parking Lot After Parking")
+        elif choice == '2':
+            remove_car(lot)
+            print_grid(lot, "Updated Parking Lot After Car Removal")
+        elif choice == '3':
+            print("👋 Exiting the program. Have a nice day!")
+            break
+        else:
+            print("❌ Invalid choice. Please enter 1, 2, or 3.")
+
+# Run the program
+if __name__ == "__main__":
+    main_menu()
